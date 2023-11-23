@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 
 import PortfolioItem from "./portfolio-item";
 
@@ -9,12 +10,7 @@ export default class PortfolioContainer extends Component {
     this.state = {
       pageTitle: "Welcome to my portfolio",
       isLoading: false,
-      data: [
-        { title: "Quip", category: "eCommerce",slug:"quip" },
-        { title: "Eventbrite", category: "Scheduling", slug:"eventbrite"},
-        { title: "Ministry Safe", category: "Enterprise", slug:"ministry-safe" },
-        { title: "SwingAway", category: "eCommerce", slug:"swingaway" }
-      ]
+      data: []
     };
 
     this.handleFilter = this.handleFilter.bind(this);
@@ -28,16 +24,39 @@ export default class PortfolioContainer extends Component {
     });
   }
 
+  getPortfolioItems() {
+    axios
+      .get("https://jordan.devcamp.space/portfolio/portfolio_items")
+      .then(response => {
+        this.setState({
+          data: response.data.portfolio_items
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
   portfolioItems() {
+     // Data that we'll need:
+    // - background image: thumb_image_url
+    // - logo
+    // - description: description
+    // - id: id
     return this.state.data.map(item => {
-      return <PortfolioItem title={item.title} url={"google.com"} slug={item.slug} />;
+      return <PortfolioItem key={item.id} title={item.name} url={item.url} slug={item.id} />;
     });
+  }
+
+  componentDidMount() {
+    this.getPortfolioItems();
   }
 
   render() {
     if (this.state.isLoading) {
       return <div>Loading...</div>;
     }
+
     return (
       <div>
         <h2>{this.state.pageTitle}</h2>
